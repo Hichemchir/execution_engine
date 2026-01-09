@@ -9,3 +9,38 @@ dependencies = [
     "pandas>=2.3.3",
     "scikit-learn>=1.8.0",
 ]
+
+[dependency-groups]
+dev = [
+    "pyright>=1.1.408",
+    "ruff>=0.14.11",
+]
+
+# RUFF Config
+[tool.ruff]
+line-length = 100
+
+# include
+src = ["src", "tests"]
+# exclude
+exclude = [
+    ".git",
+    ".venv",
+    "__pycache__",
+    "*.egg-info",
+]
+
+[tool.ruff.lint]
+# Rules activated
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort (import sorting)
+    "B",    # flake8 (potential bugs)
+    "UP",   # pyupgrade (mordernize code)
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"

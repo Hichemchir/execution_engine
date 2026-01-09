@@ -1,6 +1,6 @@
 import pandas as pd
-from src.execution_engine.models.order import Order, ExecutionSlice, ExecutionResult
-from src.execution_engine.utils.logging import get_logger
+
+from src.execution_engine.models.order import ExecutionResult, ExecutionSlice, Order
 
 
 def execute_twap(df: pd.DataFrame, order: Order, start_idx: int) -> ExecutionSlice:
@@ -15,37 +15,32 @@ def execute_twap(df: pd.DataFrame, order: Order, start_idx: int) -> ExecutionSli
     for i in range(order.num_slices):
         day_idx = start_idx + i
         if day_idx >= len(df):
-            logger.warning("Not enough data")
-        
+            logger.warning("Not enough data")  # noqa
+
         row = df.iloc[day_idx]
         # We exec at close price (simple)
-        price = row['Close']
+        price = row["Close"]
 
         slice_cost = price * slice_size
         total_cost += slice_cost
 
         exec = ExecutionSlice(
-            day=i + 1,
-            date=row['Date'],
-            size=slice_size,
-            price=price,
-            cost=slice_cost
+            day=i + 1, date=row["Date"], size=slice_size, price=price, cost=slice_cost
         )
-        
+
         slices.append(exec)
-    
+
     avg_price = total_cost / order.size
     benchmark_price = df.iloc[start_idx]["Close"]
 
     # Slippage: how much more we paid VS initial price
     slippage = (avg_price - benchmark_price) / benchmark_price
-    slippage_bps = slippage * 10000 # convert to basis points
+    slippage_bps = slippage * 10000  # convert to basis points
 
     return ExecutionResult(
         slices=slices,
         total_cost=total_cost,
         avg_price=avg_price,
         benchmark_price=benchmark_price,
-        slippage_bps=slippage_bps
+        slippage_bps=slippage_bps,
     )
- 
