@@ -1,8 +1,8 @@
+
 import pandas as pd
 
-from execution_engine.models.order import ExecutionResult, ExecutionSlice, Order
-from execution_engine.utils.logging import get_logger
-from typing import List
+from src.execution_engine.models.order import ExecutionResult, ExecutionSlice, Order
+from src.execution_engine.utils.logging import get_logger
 
 logger = get_logger(__name__)
 
@@ -14,8 +14,8 @@ def execute_vwap(df: pd.DataFrame, order: Order, start_idx: int) -> ExecutionRes
     # Get volume data for execution window
     end_idx = start_idx + order.num_slices
     if end_idx > len(df):
-        logger.warning(f"Not enough data")
-    
+        logger.warning("Not enough data")
+
     window_df = df.iloc[start_idx:end_idx].copy()
 
     # Calculate volume proportions
@@ -25,7 +25,7 @@ def execute_vwap(df: pd.DataFrame, order: Order, start_idx: int) -> ExecutionRes
     # Allocate shares proportionnaly to volume
     window_df["slice_size"] = window_df["volume_pct"] * order.size
 
-    slices: List[ExecutionSlice] = []
+    slices: list[ExecutionSlice] = []
     total_cost = 0.0
 
     for i, (_, row) in enumerate(window_df.iterrows()):
@@ -39,7 +39,7 @@ def execute_vwap(df: pd.DataFrame, order: Order, start_idx: int) -> ExecutionRes
         )
 
         slices.append(exec)
-    
+
     avg_price = total_cost / order.size
     benchmark_price = float(window_df.iloc[start_idx]['Close'])
 
@@ -53,5 +53,3 @@ def execute_vwap(df: pd.DataFrame, order: Order, start_idx: int) -> ExecutionRes
         benchmark_price=benchmark_price,
         slippage_bps=slippage_bps
     )
-
-print(2)
