@@ -1,4 +1,5 @@
-from pathlib import Path
+from models import Order, ExecutionSlice, ExecutionResult
+from utils import load_data, DATA_PATH
 
 import logging
 import pandas as pd
@@ -11,50 +12,81 @@ logging.basicConfig(
 )
 logger = logging.getLogger(name=__name__)
 
-# Constants
-data_path = Path("../data/SP500.csv")
 
+def execute_twap(df: pd.DataFrame, order: Order, start_idx: int) -> ExecutionSlice:
+    """Execute order using TWAP: equal slices over time.
+    TWAP = time weighted average price
+    Split order into equal pieces, one per day
+    """
+    slice_size = order.size / order.num_slices
+    slices = []
+    total_cost = 0.0
 
-def load_data(filepath: Path) -> pd.DataFrame:
-    df = pd.read_csv(filepath, parse_dates=["Date"])
-    return df
+    for i in range(order.num_slices):
+        day_idx = start_idx + i
+        if day_idx >= len(df):
+            logger.warning("Not enough data")
+        
+        row = df.iloc[day_idx]
+        # We exec at close price (simple)
+        price = row['Close']
 
-def kpi_ohlcv(df : pd.DataFrame) -> None:
-    logger.info(f"\nColumns: {df.columns.tolist()}")
+        slice_cost = price * slice_size
+        total_cost += slice_cost
 
-    sample = df.iloc[-5:]
-    logger.info(f"5 most recent days:\n{sample}")
-
-    last_day = df.iloc[-1]
-    daily_move = last_day['High'] - last_day['Low']
-    pct_move = (daily_move / last_day['Open']) * 100
-    logger.info(f"Daily range: ${daily_move:.2f} ({pct_move:.2f})")
-
-def metrics(df: pd.DataFrame) -> pd.DataFrame:
-    result = df.copy()
-
-    # Daily return: did price go up or down
-    result['daily_return'] = result['Close'].pct_change()
-
-    result['avg_price'] = (result['High'] + result['Low']) / 2
-    result['daily_volatility'] = (result['High'] - result['Low']) / result['Open']
+        exec = ExecutionSlice(
+            day=i + 1,
+            date=row['Date'],
+            size=slice_size,
+            price=price,
+            cost=slice_cost
+        )
+        
+        slices.append(exec)
     
-    return result
+    avg_price = total_cost / order.size
+    benchmark_price = df.iloc[start_idx]["Close"]
+
+    # Slippage: how much more we paid VS initial price
+    slippage = (avg_price - benchmark_price) / benchmark_price
+    slippage_bps = slippage * 10000 # convert to basis points
+
+    return ExecutionResult(
+        slices=slices,
+        total_cost=total_cost,
+        avg_price=avg_price,
+        benchmark_price=benchmark_price,
+        slippage_bps=slippage_bps
+    )
 
 
 
 def main() -> None:
-    if not data_path.exists():
-        logger.error(f"Data file not found {data_path}")
+    if not DATA_PATH.exists():
+        logger.error(f"Data file not found {DATA_PATH}")
     
-    df = load_data(data_path)
-    logger.info(f"Data loaded:\n {df.tail()}")
+    df = load_data(DATA_PATH)
+    # logger.info(f"Data loaded:\n {df.tail()}")
 
-    kpi_ohlcv(df)
-    metric = metrics(df)
-    logger.info(f"Metrics:\n{metric}")
+    # Test
+    order = Order(
+        size=100,
+        direction="buy",
+        num_slices=2
+    )
 
-    logger.info(f"Avg daily return: {metric['daily_return'].mean()*100:.3f}%")
+    start_idx = len(df) - 50
+    result = execute_twap(df=df, order=order, start_idx=start_idx)
+
+    logger.info(f"\nExecution Summary:")
+    logger.info(f"  Benchmark price (day 1): ${result.benchmark_price:.2f}")
+    logger.info(f"  Average execution price: ${result.avg_price:.2f}")
+    logger.info(f"  Total cost: ${result.total_cost:,.2f}")
+    logger.info(f"  Slippage: {result.slippage_bps:+.2f} bps")
+    
+    if result.slippage_bps > 0:
+        extra_cost = result.total_cost - (result.benchmark_price * order.size)
+        logger.info(f"  Extra cost vs benchmark: ${extra_cost:,.2f}")
 
 if __name__ == "__main__":
     main()
