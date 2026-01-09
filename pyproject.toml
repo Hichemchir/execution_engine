@@ -12,7 +12,9 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "pre-commit>=4.5.1",
     "pyright>=1.1.408",
+    "pytest>=9.0.2",
     "ruff>=0.14.11",
 ]
 
@@ -44,3 +46,13 @@ select = [
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "space"
+
+# ===== PYRIGHT Config =====
+[tool.pyright]
+include = ["src"]
+typeCheckingMode = "basic"
+
+reportMissingImports = true
+reportMissingTypeStubs = false
+reportUnusedImport = "warning"
+reportUnusedVariable = "warning"

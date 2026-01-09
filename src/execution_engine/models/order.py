@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-
+from typing import Literal
 import pandas as pd
 
 
@@ -10,7 +10,7 @@ class Order:
     """
 
     size: float  # number of shares
-    direction: str  # buy or sell
+    direction: Literal["buy", "sell"]  # buy or sell
     num_slices: int = 10  # spit into how many pieces
 
 

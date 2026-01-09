@@ -1,9 +1,11 @@
 import pandas as pd
 
 from src.execution_engine.models.order import ExecutionResult, ExecutionSlice, Order
+from src.execution_engine.utils.logging import get_logger
 
+logger = get_logger(__name__)
 
-def execute_twap(df: pd.DataFrame, order: Order, start_idx: int) -> ExecutionSlice:
+def execute_twap(df: pd.DataFrame, order: Order, start_idx: int) -> ExecutionResult:
     """Execute order using TWAP: equal slices over time.
     TWAP = time weighted average price
     Split order into equal pieces, one per day
