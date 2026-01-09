@@ -1,16 +1,6 @@
-from models import Order, ExecutionSlice, ExecutionResult
-from utils import load_data, DATA_PATH
-
-import logging
 import pandas as pd
-import numpy as np
-
-# Logging def
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(name)s - %(message)s"
-)
-logger = logging.getLogger(name=__name__)
+from src.execution_engine.models.order import Order, ExecutionSlice, ExecutionResult
+from src.execution_engine.utils.logging import get_logger
 
 
 def execute_twap(df: pd.DataFrame, order: Order, start_idx: int) -> ExecutionSlice:
@@ -58,35 +48,4 @@ def execute_twap(df: pd.DataFrame, order: Order, start_idx: int) -> ExecutionSli
         benchmark_price=benchmark_price,
         slippage_bps=slippage_bps
     )
-
-
-
-def main() -> None:
-    if not DATA_PATH.exists():
-        logger.error(f"Data file not found {DATA_PATH}")
-    
-    df = load_data(DATA_PATH)
-    # logger.info(f"Data loaded:\n {df.tail()}")
-
-    # Test
-    order = Order(
-        size=100,
-        direction="buy",
-        num_slices=2
-    )
-
-    start_idx = len(df) - 50
-    result = execute_twap(df=df, order=order, start_idx=start_idx)
-
-    logger.info(f"\nExecution Summary:")
-    logger.info(f"  Benchmark price (day 1): ${result.benchmark_price:.2f}")
-    logger.info(f"  Average execution price: ${result.avg_price:.2f}")
-    logger.info(f"  Total cost: ${result.total_cost:,.2f}")
-    logger.info(f"  Slippage: {result.slippage_bps:+.2f} bps")
-    
-    if result.slippage_bps > 0:
-        extra_cost = result.total_cost - (result.benchmark_price * order.size)
-        logger.info(f"  Extra cost vs benchmark: ${extra_cost:,.2f}")
-
-if __name__ == "__main__":
-    main()
+ 

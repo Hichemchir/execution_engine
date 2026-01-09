@@ -1,3 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+.venv/
+venv/
+
+# uv
 uv.lock
-src/__pycache__/models.cpython-313.pyc
-src/__pycache__/utils.cpython-313.pyc
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Ruff
+.ruff_cache/
+
+# Logs
+logs/
+*.log
+
+# Data 
+data/models/
+*.pkl
+
+# OS
+.DS_Store

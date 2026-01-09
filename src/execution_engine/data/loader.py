@@ -2,7 +2,7 @@ from pathlib import Path
 import pandas as pd
 
 # Constants
-DATA_PATH = Path("../data/SP500.csv")
+DATA_PATH = Path(__file__).parent.parent.parent.parent / "data" / "SP500.csv"
 
 
 def load_data(filepath: Path) -> pd.DataFrame:
