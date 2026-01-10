@@ -18,9 +18,17 @@ def execute_vwap(df: pd.DataFrame, order: Order, start_idx: int) -> ExecutionRes
 
     window_df = df.iloc[start_idx:end_idx].copy()
 
+    # Check if NaN
+    if window_df['Volume'].isna().any():
+        logger.warning(f"Found {window_df['Volume'].isna().sum()} NaN volumes. Filling with 0.")
+        window_df["Volume"] = window_df['Volume'].fillna(0)
+
     # Calculate volume proportions
     total_volume = window_df["Volume"].sum()
-    window_df["volume_pct"] = window_df["Volume"] / total_volume
+    if total_volume == 0:
+        window_df["Volume"] = 1.0 / len(window_df)
+    else:
+        window_df["volume_pct"] = window_df["Volume"] / total_volume
 
     # Allocate shares proportionnaly to volume
     window_df["slice_size"] = window_df["volume_pct"] * order.size
