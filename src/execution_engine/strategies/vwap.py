@@ -26,7 +26,7 @@ def execute_vwap(df: pd.DataFrame, order: Order, start_idx: int) -> ExecutionRes
     # Calculate volume proportions
     total_volume = window_df["Volume"].sum()
     if total_volume == 0:
-        window_df["Volume"] = 1.0 / len(window_df)
+        window_df["volume_pct"] = 1.0 / len(window_df)
     else:
         window_df["volume_pct"] = window_df["Volume"] / total_volume
 
