@@ -5,4 +5,6 @@ An execution_engine cuts in a smart way the order.
 
 # todo
 
-- twap, vwap, backtest, ml predictor
+- Python: twap, vwap, backtest, ml predictor
+- C++ : twap + binding
+- Benchmark and comparison Python && C++
