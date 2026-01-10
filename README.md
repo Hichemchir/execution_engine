@@ -6,5 +6,5 @@ An execution_engine cuts in a smart way the order.
 # todo
 
 - Python: twap, vwap, backtest, ml predictor
-- C++ : twap + binding
+- C++ : twap + binding + test
 - Benchmark and comparison Python && C++
