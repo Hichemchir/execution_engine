@@ -11,5 +11,5 @@ def load_data(filepath: Path) -> pd.DataFrame:
 
     if df["Volume"].isna().any():
         df["Volume"] = df["Volume"].fillna()
-        
+
     return df

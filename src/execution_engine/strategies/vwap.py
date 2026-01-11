@@ -1,10 +1,10 @@
-
 import pandas as pd
 
 from src.execution_engine.models.order import ExecutionResult, ExecutionSlice, Order
 from src.execution_engine.utils.logging import get_logger
 
 logger = get_logger(__name__)
+
 
 def execute_vwap(df: pd.DataFrame, order: Order, start_idx: int) -> ExecutionResult:
     """Execute order using VWAP: slices proportional to volume.
@@ -19,9 +19,9 @@ def execute_vwap(df: pd.DataFrame, order: Order, start_idx: int) -> ExecutionRes
     window_df = df.iloc[start_idx:end_idx].copy()
 
     # Check if NaN
-    if window_df['Volume'].isna().any():
+    if window_df["Volume"].isna().any():
         logger.warning(f"Found {window_df['Volume'].isna().sum()} NaN volumes. Filling with 0.")
-        window_df["Volume"] = window_df['Volume'].fillna(0)
+        window_df["Volume"] = window_df["Volume"].fillna(0)
 
     # Calculate volume proportions
     total_volume = window_df["Volume"].sum()
@@ -49,7 +49,7 @@ def execute_vwap(df: pd.DataFrame, order: Order, start_idx: int) -> ExecutionRes
         slices.append(exec)
 
     avg_price = total_cost / order.size
-    benchmark_price = float(window_df.iloc[start_idx]['Close'])
+    benchmark_price = float(window_df.iloc[start_idx]["Close"])
 
     slippage = (avg_price - benchmark_price) / benchmark_price
     slippage_bps = slippage * 10000
@@ -59,5 +59,5 @@ def execute_vwap(df: pd.DataFrame, order: Order, start_idx: int) -> ExecutionRes
         total_cost=total_cost,
         avg_price=avg_price,
         benchmark_price=benchmark_price,
-        slippage_bps=slippage_bps
+        slippage_bps=slippage_bps,
     )

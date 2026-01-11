@@ -1,9 +1,9 @@
-from execution_engine import DATA_PATH, Order, execute_vwap, load_data, ExecutionResult
+from execution_engine import DATA_PATH, ExecutionResult, Order, execute_vwap, load_data
 
 df = load_data(DATA_PATH)
 
-class TestVWAP:
 
+class TestVWAP:
     def test_basic_vwap(self):
         # AAA: arrange act assert
         order = Order(10000, "buy", 5)

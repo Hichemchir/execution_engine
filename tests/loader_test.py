@@ -1,9 +1,9 @@
-from execution_engine import load_data, DATA_PATH
+from execution_engine import DATA_PATH, load_data
 
 # AAA
 
-class TestLoad:
 
+class TestLoad:
     def test_load_data(self):
         df = load_data(DATA_PATH)
 
