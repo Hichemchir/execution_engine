@@ -37,4 +37,4 @@ data/models/
 .DS_Store
 
 # Build cpp
-src/build/
+cpp/build/

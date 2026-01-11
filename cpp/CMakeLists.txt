@@ -11,7 +11,10 @@ set(SOURCES
     src/execution_engine.cpp
 )
 
-# Python module
+# ============================================================================
+# PYTHON MODULE
+# ============================================================================
+
 pybind11_add_module(_execution_cpp 
     ${SOURCES}
     bindings/bindings.cpp
@@ -21,3 +24,33 @@ pybind11_add_module(_execution_cpp
 install(TARGETS _execution_cpp
     LIBRARY DESTINATION ${CMAKE_SOURCE_DIR}/../src/execution_engine
 )
+
+# ============================================================================
+# GOOGLE TEST SETUP
+# ============================================================================
+
+include(FetchContent)
+FetchContent_Declare(
+    googletest
+    URL https://github.com/google/googletest/archive/refs/tags/v1.15.2.zip
+)
+
+FetchContent_MakeAvailable(googletest)
+
+enable_testing()
+
+# ============================================================================
+# TEST EXECUTABLE
+# ============================================================================
+
+add_executable(test_twap
+    test/test_twap.cpp  
+    ${SOURCES}  
+)
+
+target_link_libraries(test_twap  
+    GTest::gtest_main                
+)
+
+include(GoogleTest)
+gtest_discover_tests(test_twap)
