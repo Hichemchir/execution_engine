@@ -81,7 +81,7 @@ PYBIND11_MODULE(_execution_cpp, m) {
         .def(py::init<>(), "Create execution engine")
 
         // Method execution_twap
-        .def("execution_twap", &ExecutionEngine::execute_twap,
+        .def("execute_twap", &ExecutionEngine::execute_twap,
             py::arg("prices"),
             py::arg("order"),
             py::arg("start_idx"),
