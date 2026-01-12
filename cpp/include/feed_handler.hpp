@@ -12,6 +12,17 @@
 #include <queue>
 #include <chrono>
 
+/**
+ * Problem: receives market data in real time from a distant server (Finnhub)
+ * through internet.
+ * 
+ * Constraints:
+ *  - permanent connexion (no HTTP request, too high latency)
+ *  - low-latency
+ *  - Thread-safe (multiple threads to access shared resources)
+ *  - Deconexion management
+ */
+
 namespace trading {
 
 // Market tick structure
