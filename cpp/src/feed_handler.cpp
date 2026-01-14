@@ -11,6 +11,7 @@ FeedHandler::FeedHandler(const FeedConfig& config)
     setup_websocket();
 }
 
+// Destructor
 FeedHandler::~FeedHandler() {
     stop();
 }
