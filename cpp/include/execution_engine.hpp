@@ -14,7 +14,7 @@ public:
 
     // Prices: contiguous in memory for low latency
     ExecutionResult execute_twap(std::vector<double>& prices, Order& order, size_t start_idx);
-
+    ExecutionResult execute_vwap(std::vector<double>& prices, std::vector<double>& volumes, Order& order, size_t start_idx);
 };
 
 } // namespace execution

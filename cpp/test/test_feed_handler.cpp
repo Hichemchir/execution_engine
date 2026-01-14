@@ -250,7 +250,7 @@ TEST_F(FeedHandlerTest, ConcurrentMetricsAccess) {
 }
 
 // ============================================================================
-// Integration Tests (require real API key)
+// Integration Tests (require API key)
 // ============================================================================
 
 TEST_F(FeedHandlerIntegrationTest, RealConnectionReceivesTicks) {
@@ -274,7 +274,7 @@ TEST_F(FeedHandlerIntegrationTest, RealConnectionReceivesTicks) {
     
     auto metrics = handler.get_metrics();
     
-    std::cout << "\n📊 Integration Test Results:" << std::endl;
+    std::cout << "\nIntegration Test Results:" << std::endl;
     std::cout << "  Ticks received: " << metrics.ticks_received << std::endl;
     std::cout << "  Callbacks executed: " << metrics.callbacks_executed << std::endl;
     std::cout << "  Avg latency: " << metrics.avg_latency_us << " μs" << std::endl;
@@ -290,7 +290,7 @@ TEST_F(FeedHandlerIntegrationTest, HistoryStorageWorks) {
     
     auto ticks = handler.get_recent_ticks("AAPL", 10);
     
-    std::cout << "📚 Stored " << ticks.size() << " ticks in history" << std::endl;
+    std::cout << "Stored " << ticks.size() << " ticks in history" << std::endl;
     
     for (const auto& tick : ticks) {
         std::cout << "  " << tick.symbol << " $" << tick.price 
@@ -311,7 +311,7 @@ TEST_F(FeedHandlerIntegrationTest, MetricsAreTracked) {
     
     auto metrics = handler.get_metrics();
     
-    std::cout << "\n📊 Detailed Metrics:" << std::endl;
+    std::cout << "\nDetailed Metrics:" << std::endl;
     std::cout << "  Ticks received:     " << metrics.ticks_received << std::endl;
     std::cout << "  Ticks processed:    " << metrics.ticks_processed << std::endl;
     std::cout << "  Callbacks executed: " << metrics.callbacks_executed << std::endl;
