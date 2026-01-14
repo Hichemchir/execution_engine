@@ -56,22 +56,47 @@ ExecutionResult ExecutionEngine::execute_vwap(
 ) {
     ExecutionResult results;
 
-    std::vector<double> volume_pct;
-    std::vector<int> slice_size;
+    if (prices.size() != volumes.size()) {
+        throw std::invalid_argument("Prices and volumes must have same size");
+    }
 
-    double total_volume = std::accumulate(volumes.begin(), volumes.end(), 0.0);
+    if (start_idx >= prices.size()) {
+        throw std::out_of_range("Start_idx out of range");
+    }
+
+    // Execution window
+    size_t end_idx = std::min(start_idx + order.num_slices, prices.size());
+    size_t actual_slices = end_idx - start_idx;
+
+    // Step 1: calculate total volume in execution window
+    double total_volume = 0;
+    for (size_t i = 0; i < end_idx; ++i) {
+        total_volume += volumes[i];
+    }
+
+    // Step 2: calculate volume percentage and slice sizes
+    std::vector<double> volume_pct(actual_slices);
+    std::vector<int> slice_sizes(actual_slices);
+
     if (total_volume == 0.0) {
-        volume_pct = 1 / volumes.size();
+        // equal distrib if no volume data
+        double equal_pct = 1.0 / actual_slices;
+        for (size_t i = 0; i < actual_slices; ++i) {
+            volume_pct[i] = equal_pct;
+            slice_sizes[i] = order.size * equal_pct;
+        }
     }
     else {
-        volume_pct = volumes / total_volume;
+        // proportionnal to volume
+        for (size_t i = 0; i < actual_slices; ++i) {
+            
+        }
     }
 
-    slice_size = volume_pct * order.size;
+    slice_sizes = volume_pct * order.size;
 
     std::vector<ExecutionSlice> slices;
     double total_cost = 0.0;
-    size_t end_idx = std::min(start_idx + order.num_slices, prices.size())
 
 
     // iteration over prices
