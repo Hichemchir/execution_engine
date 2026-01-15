@@ -3,7 +3,7 @@
 import statistics
 import time
 
-import src.execution_engine._execution_cpp as cpp
+import execution_engine._execution_cpp as cpp
 
 from execution_engine import DATA_PATH, execute_twap, load_data
 from execution_engine import Order as PyOrder

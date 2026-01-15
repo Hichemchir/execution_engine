@@ -1,7 +1,7 @@
 import pandas as pd
 
-from src.execution_engine.models.order import ExecutionResult, ExecutionSlice, Order
-from src.execution_engine.utils.logging import get_logger
+from execution_engine.models.order import ExecutionResult, ExecutionSlice, Order
+from execution_engine.utils.logging import get_logger
 
 logger = get_logger(__name__)
 

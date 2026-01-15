@@ -3,7 +3,7 @@
 import pytest
 
 try:
-    import src.execution_engine._execution_cpp as cpp
+    import execution_engine._execution_cpp as cpp
 
     CPP_AVAILABLE = True
 except ImportError:

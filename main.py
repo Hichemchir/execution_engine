@@ -2,7 +2,7 @@
 
 import sys
 
-from src.execution_engine import DATA_PATH, Order, execute_twap, get_logger, load_data
+from execution_engine import DATA_PATH, Order, execute_twap, get_logger, load_data
 
 logger = get_logger(__name__)
 

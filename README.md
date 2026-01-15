@@ -95,7 +95,7 @@ print(f"Slippage: {result.slippage_bps:.2f} bps")
 ### C++ API (via Python bindings)
 
 ```python
-import src.execution_engine._execution_cpp as cpp
+import execution_engine._execution_cpp as cpp
 
 # Create C++ engine
 engine = cpp.ExecutionEngine()
