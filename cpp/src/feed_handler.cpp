@@ -26,7 +26,7 @@ void FeedHandler::setup_websocket() {
     });
 
     if (config_.enable_logging) {
-        std::cout << "📡 WebSocket configured for Finnhub\n";
+        std::cout << "WebSocket configured for Finnhub\n";
     }
 }
 
@@ -48,12 +48,12 @@ void FeedHandler::start() {
     heartbeat_thread_ = std::thread(&FeedHandler::heartbeat_loop, this);
 
     if (config_.enable_logging) {
-        std::cout << "🚀 Feed handler started\n";
+        std::cout << "Feed handler started\n";
     }
 }
 
 void FeedHandler::stop() {
-    if (!running_) return;  // ✅ FIXED: Already stopped
+    if (!running_) return; 
     
     running_ = false;
     connected_ = false;
@@ -78,7 +78,7 @@ void FeedHandler::subscribe(const std::string& symbol) {
     websocket_->send(msg.dump());
     
     if (config_.enable_logging) {
-        std::cout << "📊 Subscribed to " << symbol << "\n";
+        std::cout << "Subscribed to " << symbol << "\n";
     }
 }
 
@@ -257,7 +257,7 @@ void FeedHandler::print_metrics() const {
     auto m = get_metrics();
     
     std::cout << "\n" << std::string(60, '=') << "\n";
-    std::cout << "📊 Feed Handler Metrics\n";
+    std::cout << "Feed Handler Metrics\n";
     std::cout << std::string(60, '=') << "\n";
     std::cout << "  Ticks received:     " << m.ticks_received << "\n";
     std::cout << "  Ticks processed:    " << m.ticks_processed << "\n";

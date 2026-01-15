@@ -43,7 +43,7 @@ ExecutionResult ExecutionEngine::execute_twap(
     double benchmark = prices[start_idx];
     results.benchmark_price = benchmark;
     results.avg_price = avg_price / actual_slices;
-    results.slippage_bps = ExecutionEngine::calculate_slippage(avg_price, benchmark);
+    results.slippage_bps = ExecutionEngine::calculate_slippage(results.avg_price, benchmark);
 
     return results;
 };
@@ -89,27 +89,29 @@ ExecutionResult ExecutionEngine::execute_vwap(
     else {
         // proportionnal to volume
         for (size_t i = 0; i < actual_slices; ++i) {
-            
+            size_t price_idx = start_idx + i;
+            volume_pct[i] = volumes[price_idx] / total_volume;
+            slice_sizes[i] = order.size * volume_pct[i];
         }
     }
 
-    slice_sizes = volume_pct * order.size;
-
-    std::vector<ExecutionSlice> slices;
+    // step 3: execute slices
     double total_cost = 0.0;
+    double weighted_price = 0.0;
 
+    for (size_t i = 0; i < actual_slices; ++i) {
+        size_t price_idx = start_idx + i;
 
-    // iteration over prices
-    for (size_t i = start_idx; i < end_idx; ++i) {
-        double price = prices[i];
-        int day_idx = i + 1;
+        double price = prices[price_idx];
+        double slice_size = slice_sizes[i];
         double cost = slice_size * price;
+
         total_cost += cost;
-        avg_price += price;
+        weighted_price += price * slice_size;
 
         ExecutionSlice exec = ExecutionSlice(
-            day_idx,
-            slice_size,
+            static_cast<int>(i + 1),
+            static_cast<int>(slice_size),
             price,
             cost
         );
@@ -118,10 +120,10 @@ ExecutionResult ExecutionEngine::execute_vwap(
     }
 
     // Calculate metrics (benchmark is first price)
-    double benchmark = prices[0];
+    double benchmark = prices[start_idx];
     results.benchmark_price = benchmark;
-    results.avg_price = avg_price / prices.size();
-    results.slippage_bps = ExecutionEngine::calculate_slippage(avg_price, benchmark);
+    results.avg_price = total_cost / order.size;
+    results.slippage_bps = ExecutionEngine::calculate_slippage(results.avg_price, benchmark);
 
     return results;
 };
