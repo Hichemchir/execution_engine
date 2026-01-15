@@ -41,7 +41,7 @@ set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
-message(STATUS "✅ All dependencies fetched successfully")
+message(STATUS "All dependencies fetched successfully")
 
 # ============================================================================
 # SOURCES
@@ -114,3 +114,19 @@ target_include_directories(test_feed_handler PRIVATE test)
 gtest_discover_tests(test_feed_handler)
 
 message(STATUS "test_feed_handler configured")
+
+# Test 3: VWAP tests
+add_executable(test_vwap
+    test/test_vwap.cpp  
+    ${SOURCES}
+)
+
+target_link_libraries(test_vwap  
+    GTest::gtest_main    
+    GTest::gmock_main
+    ixwebsocket::ixwebsocket
+    nlohmann_json::nlohmann_json
+)
+
+include(GoogleTest)
+gtest_discover_tests(test_vwap)
