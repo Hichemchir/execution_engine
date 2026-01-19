@@ -21,7 +21,6 @@ from typing import Tuple, Dict
 from dataclasses import dataclass
 import sys
 
-# ✅ FIXED: Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from execution_engine import DATA_PATH, load_data
@@ -67,6 +66,9 @@ def create_features(df: pd.DataFrame, order_size: int = 100000) -> pd.DataFrame:
     # 4. Momentum (5-day return)
     features['momentum_5d'] = df['Close'].pct_change(5)
     
+    # 10-day momentum (longer term)
+    features['momentum_10d'] = df['Close'].pct_change(10)
+    
     # 5. Volume imbalance proxy (price change weighted by volume)
     features['volume_imbalance'] = (
         returns * df['Volume'] / df['Volume'].rolling(20).mean()
@@ -78,6 +80,9 @@ def create_features(df: pd.DataFrame, order_size: int = 100000) -> pd.DataFrame:
     # 7. Participation rate (order size / daily volume)
     features['participation_rate'] = order_size / df['Volume']
     
+    # Log participation rate (handle extreme values)
+    features['log_participation'] = np.log1p(features['participation_rate'])
+    
     # 8. Volatility regime (binary: high/low)
     vol_median = features['volatility'].median()
     features['high_vol_regime'] = (features['volatility'] > vol_median).astype(int)
@@ -86,11 +91,23 @@ def create_features(df: pd.DataFrame, order_size: int = 100000) -> pd.DataFrame:
     ma_20 = df['Close'].rolling(20).mean()
     features['uptrend'] = (df['Close'] > ma_20).astype(int)
     
+    # Trend strength
+    features['trend_strength'] = (df['Close'] - ma_20) / ma_20
+    
+    # Recent return (proxy for momentum continuation)
+    features['return_1d'] = df['Close'].pct_change(1)
+    
+    # Volume trend
+    ma_volume = df['Volume'].rolling(20).mean()
+    features['volume_trend'] = (df['Volume'] - ma_volume) / ma_volume
+    
     # 10. Hour of day (if intraday data available, else dummy)
     features['hour'] = 10  # Placeholder (assume mid-day execution)
     
+    # Price level (normalized by recent max)
+    features['price_level'] = df['Close'] / df['Close'].rolling(252).max()
+    
     return features
-
 
 def create_target(
     df: pd.DataFrame,
@@ -109,6 +126,10 @@ def create_target(
         
         # Compute VWAP over execution window
         window = df.iloc[i:i+execution_horizon]
+        total_volume = window['Volume'].sum()
+        if total_volume == 0 or start_price == 0:
+            impacts.append(np.nan)
+            continue
         vwap = (window['Close'] * window['Volume']).sum() / window['Volume'].sum()
         
         # Impact in bps
@@ -275,7 +296,6 @@ def plot_diagnostics(
 # ============================================================================
 # Main Pipeline
 # ============================================================================
-
 def run_simple_pipeline(
     data_path: str = "data/SP500.csv",
     order_size: int = 100000,
@@ -293,7 +313,16 @@ def run_simple_pipeline(
     # 1. Load data
     print("\n1. Loading data...")
     df = load_data(DATA_PATH)
-    print(f"   Loaded {len(df)} days of data")
+    
+    # ✅ FIX: Ensure index is datetime
+    if not isinstance(df.index, pd.DatetimeIndex):
+        df.index = pd.to_datetime(df.index)
+    
+    # ✅ FIX: Now filter by date (using pd.Timestamp for safety)
+    df = df[df.index >= pd.Timestamp('2015-01-01')]
+    df = df[df['Volume'] > 0]
+    
+    print(f"   Loaded {len(df)} days of data (2015+ with volume > 0)")
     
     # 2. Create features & target
     print("\n2. Engineering features...")
@@ -305,8 +334,8 @@ def run_simple_pipeline(
     # 3. Split data (temporal)
     print("\n3. Splitting data (temporal)...")
     X_train, X_test, y_train, y_test = split_data(X, y, test_size=config.test_size)
-    print(f"   Train: {len(X_train)} samples")
-    print(f"   Test:  {len(X_test)} samples")
+    print(f"   Train: {len(X_train)} samples ({X_train.index.min().date()} to {X_train.index.max().date()})")
+    print(f"   Test:  {len(X_test)} samples ({X_test.index.min().date()} to {X_test.index.max().date()})")
     
     # 4. Train model
     print("\n4. Training LightGBM model...")
@@ -320,20 +349,36 @@ def run_simple_pipeline(
     print(f"   R²:                  {metrics['r2']:.4f}")
     print(f"   Direction Accuracy:  {metrics['direction_accuracy']:.2%}")
     
+    # ✅ ADD: Interpretation
+    print("\n   📊 Interpretation:")
+    if metrics['r2'] > 0.3:
+        print("   ✅ Good predictive power")
+    elif metrics['r2'] > 0.1:
+        print("   ⚠️  Moderate predictive power")
+    else:
+        print("   ❌ Low predictive power - need better features")
+    
+    if metrics['direction_accuracy'] > 0.55:
+        print("   ✅ Good directional prediction")
+    elif metrics['direction_accuracy'] > 0.52:
+        print("   ⚠️  Slight edge on direction")
+    else:
+        print("   ❌ No directional edge")
+    
     # 6. Diagnostics
     print("\n6. Creating diagnostic plots...")
     plot_diagnostics(model, X_train, X_test, y_train, y_test, Path("ml/results"))
     print("   Plots saved to ml/results/")
     
     # 7. Feature importance
-    print("\n7. Top 5 Most Important Features:")
+    print("\n7. Top 10 Most Important Features:")
     importance = pd.DataFrame({
         'feature': X_train.columns,
         'importance': model.feature_importances_
     }).sort_values('importance', ascending=False)
     
-    for idx, row in importance.head(5).iterrows():
-        print(f"   {row['feature']:20s} {row['importance']:.1f}")
+    for idx, row in importance.head(10).iterrows():
+        print(f"   {row['feature']:25s} {row['importance']:.1f}")
     
     print("\n" + "=" * 60)
     print("PIPELINE COMPLETE ✓")
