@@ -198,7 +198,7 @@ make check
    - Low-latency market data feed handlers
    - Real-time risk checks
    - Order management system (OMS) integration
-   - FIX protocol support
+   - FIX protocol support.
 
 5. **Infrastructure**
    - Distributed backtesting framework
