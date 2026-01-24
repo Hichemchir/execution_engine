@@ -11,7 +11,7 @@ struct Order {
     int num_slices;
 
     // Constructor
-    Order(double s, std::string dir, int num_slices)
+    Order(double s, const std::string& dir, int num_slices)
         : size(s), direction(dir), num_slices(num_slices) {}
 };
 
